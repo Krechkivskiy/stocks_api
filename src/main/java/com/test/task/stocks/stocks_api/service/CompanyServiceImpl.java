@@ -20,13 +20,21 @@ public class CompanyServiceImpl implements CompanyService {
     private final RequestHandleService requestHandleService;
     private final CompanyRepository companyRepository;
 
-    public CompanyServiceImpl(RequestHandleService requestHandleService, CompanyRepository companyRepository) {
+    public CompanyServiceImpl(RequestHandleService requestHandleService,
+                              CompanyRepository companyRepository) {
         this.requestHandleService = requestHandleService;
         this.companyRepository = companyRepository;
     }
 
     @Override
     public List<Company> uploadCompaniesInfoBySymbols(List<String> symbols) throws InterruptedException {
+        getInfo(symbols);
+        return Arrays.asList(TemporaryCompanyStorage.getCompanies()).stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    private void getInfo(List<String> symbols) throws InterruptedException {
         int startPosition = 0;
         int step = symbols.size() / 4;
         ConcurrentRequesttExecutor thread = new ConcurrentRequesttExecutor(symbols
@@ -41,20 +49,21 @@ public class CompanyServiceImpl implements CompanyService {
                 subList(startPosition, startPosition + step), requestHandleService, startPosition);
         thread3.start();
         startPosition = startPosition + step;
+        takeInfoBySymbols(symbols, startPosition);
+        while (thread.isAlive() || thread2.isAlive() || thread3.isAlive()) {
+            Thread.sleep(12);
+        }
+    }
+
+    private void takeInfoBySymbols(List<String> symbols, int startPosition) {
         for (int i = startPosition; i < symbols.size(); i++) {
             try {
                 String sym = symbols.get(i);
-                TemporaryCompanyStorage.add(requestHandleService.getCompaniesInfoBySymbols(sym), i);
+                TemporaryCompanyStorage.add(requestHandleService.getCompaniesInfoBySymbol(sym), i);
             } catch (HttpClientErrorException e) {
                 --i;
             }
         }
-        while (thread.isAlive() || thread2.isAlive() || thread3.isAlive()) {
-            Thread.sleep(12);
-        }
-        return Arrays.asList(TemporaryCompanyStorage.getCompanies()).stream()
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
     }
 
     @Override

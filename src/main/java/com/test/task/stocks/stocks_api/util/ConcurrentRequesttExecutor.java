@@ -27,7 +27,7 @@ public class ConcurrentRequesttExecutor extends Thread {
         for (int i = 0; i < symbols.size(); i++) {
             String symbol = symbols.get(i);
             try {
-                TemporaryCompanyStorage.add(requestHandleService.getCompaniesInfoBySymbols(symbol), startPosition);
+                TemporaryCompanyStorage.add(requestHandleService.getCompaniesInfoBySymbol(symbol), startPosition);
                 startPosition++;
             } catch (HttpClientErrorException e) {
                 --i;

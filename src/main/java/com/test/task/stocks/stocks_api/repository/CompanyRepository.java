@@ -21,5 +21,4 @@ public interface CompanyRepository extends CrudRepository<Company, Long> {
             "is not null order by c.change_percent asc limit 5",
             nativeQuery = true)
     List<Company> findTop5ByOrderByChangePercentDesc();
-
 }

@@ -31,7 +31,7 @@ public class RequestHandleService {
         return Arrays.stream(result).map(Company::getSymbol).collect(Collectors.toList());
     }
 
-    public Company getCompaniesInfoBySymbols(String symbol) throws HttpClientErrorException {
+    public Company getCompaniesInfoBySymbol(String symbol) throws HttpClientErrorException {
         try {
             String link = INFO_BY_COMPANY_BY_SYMBOL_URL.replaceAll("insert", symbol);
             return this.restTemplate.getForObject(link, Company.class);
